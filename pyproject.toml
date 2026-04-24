@@ -1,0 +1,13 @@
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = "-p no:warnings"
+
+[tool.ruff]
+line-length = 88
+
+[tool.taskipy.tasks]
+api = "uvicorn src.app:app --reload"
+test = "pytest -v"
+pre_test = "ruff check ."
+lint = "ruff check ."
+format = "ruff format ."
