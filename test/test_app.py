@@ -1,9 +1,9 @@
 from http import HTTPStatus
 from fastapi.testclient import TestClient
-from sqlalchemy import select
+from sqlalchemy import select, func
 from models import Users
-
-from src.app import app
+from database import get_db
+from app import app
 
 client = TestClient(app)
 
@@ -36,3 +36,9 @@ def test_create_user(client_override, session):
 
     assert new_user.username == "test"
     assert new_user.email == "test@example.com"
+
+
+def test_read_users(session = get_db):
+    response = client.get("/read/")
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() is not None

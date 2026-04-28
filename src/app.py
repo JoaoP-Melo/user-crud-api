@@ -43,3 +43,9 @@ def create_user(user: PrivateUser, session: Session = Depends(get_db)):
     session.refresh(new_user)
 
     return new_user
+
+
+@app.get("/read/", status_code=HTTPStatus.OK)
+def read_users(session: Session = Depends(get_db)):
+    users = session.scalars(select(Users)).all()
+    return users
