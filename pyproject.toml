@@ -4,10 +4,10 @@ addopts = "-p no:warnings"
 
 [tool.ruff]
 line-length = 88
+exclude = ["alembic/"]
 
 [tool.taskipy.tasks]
 api = "uvicorn src.app:app --reload"
 test = "pytest -v"
-pre_test = "ruff check ."
 lint = "ruff check ."
 format = "ruff format ."

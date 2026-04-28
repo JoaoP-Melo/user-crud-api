@@ -1,11 +1,12 @@
 from fastapi import FastAPI, Depends, HTTPException
 from http import HTTPStatus
-from sqlalchemy import select, or_
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from schemas import Message,PublicUser, PrivateUser
+from schemas import Message, PublicUser, PrivateUser
 from models import Users
 from database import get_db
+
 app = FastAPI()
 
 
@@ -14,37 +15,28 @@ def read_root():
     return {"message": "Hello Word"}
 
 
-@app.post("/create/")
+@app.post("/create/", status_code=HTTPStatus.CREATED, response_model=PublicUser)
 def create_user(user: PrivateUser, session: Session = Depends(get_db)):
-    query = (select(Users).
-            where(
-                or_(
-                    Users.nome == user.nome,
-                    Users.email == user.email,
-                    Users.cpf == user.cpf)
-            )
+
+    existing_user = session.scalar(
+        select(Users).where(
+            (Users.username == user.username) | (Users.email == user.email)
         )
-    
-    result = session.scalar(query)
+    )
 
-    if result:
-        if result.nome == user.nome:
+    if existing_user:
+        if existing_user.username == user.username:
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
-                detail='Username already exists',
+                detail="Username already exists",
             )
-        elif result.email == user.email:
+        elif existing_user.email == user.email:
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
-                detail='Email already exists',
-            )
-        elif result.cpf == user.cpf:
-            raise HTTPException(
-                status_code=HTTPStatus.CONFLICT,
-                detail='cpf already exists',
+                detail="Email already exists",
             )
 
-    new_user = Users(**user.dict())
+    new_user = Users(username=user.username, age=user.age, email=user.email)
 
     session.add(new_user)
     session.commit()
