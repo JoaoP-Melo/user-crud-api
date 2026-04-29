@@ -86,3 +86,20 @@ def update_users(id: int, user: PrivateUser, session: Session = Depends(get_db))
     session.commit()
     
     return user
+
+
+@app.get("/search/{id}", status_code=HTTPStatus.OK, response_model=PublicUser)
+def search_user(id: int, session: Session = Depends(get_db)):
+    existing_user = session.scalar(
+        select(Users).where(
+           (Users.id == id)
+        )
+    )
+
+    if existing_user is None:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="ID not found",
+            )
+    
+    return existing_user

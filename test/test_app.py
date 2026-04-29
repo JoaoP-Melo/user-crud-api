@@ -51,3 +51,17 @@ def test_update_users(client_override, add_user_database, session):
     assert response.status_code == HTTPStatus.OK
     assert response.json()["username"] != session.scalar
     
+
+def test_search_users(client_override, add_user_database, session):
+    response = client_override.get(
+        "/search/1"
+    )
+
+    existing_user = session.scalar(
+        select(Users).where(
+           (Users.id == 1)
+        )
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json()["id"] == existing_user.id
