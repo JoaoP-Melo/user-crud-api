@@ -51,7 +51,7 @@ def read_users(session: Session = Depends(get_db)):
     return users
 
 
-@app.put("/update/", status_code=HTTPStatus.OK)
+@app.put("/update/{id}", status_code=HTTPStatus.OK)
 def update_users(id: int, user: PrivateUser, session: Session = Depends(get_db)):
     existing_user = session.scalar(
         select(Users).where(

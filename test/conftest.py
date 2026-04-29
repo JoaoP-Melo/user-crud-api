@@ -7,7 +7,7 @@ from sqlalchemy.pool import StaticPool
 from models import Base, Users
 from app import app
 from database import get_db
-
+from schemas import PrivateUser
 
 @pytest.fixture
 def engine():
@@ -40,3 +40,17 @@ def client_override(session):
         yield client
 
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def add_user_database(session):
+    new_user = Users(
+        username="TEST",
+        age= 0,
+        email= "TEST@example.com"
+    )
+
+    session.add(new_user)
+    session.commit  
+    
+    return new_user

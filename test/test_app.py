@@ -41,3 +41,13 @@ def test_read_users(session=get_db):
     response = client.get("/read/")
     assert response.status_code == HTTPStatus.OK
     assert response.json() is not None
+
+
+def test_update_users(client_override, add_user_database, session):
+    response = client_override.put(
+        "/update/1", json={"username": "teste", "age": 0, "email": "teste@example.com"}
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json()["username"] != session.scalar
+    
