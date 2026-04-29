@@ -28,8 +28,7 @@ def test_create_user(client_override, session):
     }
 
     query = select(Users).where(
-        Users.email == "test@example.com",
-        Users.username == "test"
+        Users.email == "test@example.com", Users.username == "test"
     )
 
     new_user = session.execute(query).scalars().first()
@@ -38,7 +37,7 @@ def test_create_user(client_override, session):
     assert new_user.email == "test@example.com"
 
 
-def test_read_users(session = get_db):
+def test_read_users(session=get_db):
     response = client.get("/read/")
     assert response.status_code == HTTPStatus.OK
     assert response.json() is not None

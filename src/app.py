@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException
 from http import HTTPStatus
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from schemas import Message, PublicUser, PrivateUser
@@ -49,3 +49,40 @@ def create_user(user: PrivateUser, session: Session = Depends(get_db)):
 def read_users(session: Session = Depends(get_db)):
     users = session.scalars(select(Users)).all()
     return users
+
+
+@app.put("/update/", status_code=HTTPStatus.OK)
+def update_users(id: int, user: PrivateUser, session: Session = Depends(get_db)):
+    existing_user = session.scalar(
+        select(Users).where(
+           (Users.id == id)
+        )
+    )
+
+
+    if existing_user is None:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="ID not found",
+            )
+    
+    if existing_user:
+        if existing_user.username == user.username:
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail="Username already exists",
+            )
+        elif existing_user.email == user.email:
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail="Email already exists",
+            )
+    
+
+    existing_user.username = user.username
+    existing_user.age = user.age
+    existing_user.email = user.email
+
+    session.commit()
+    
+    return user

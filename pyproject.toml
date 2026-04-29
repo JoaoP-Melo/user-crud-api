@@ -4,7 +4,12 @@ addopts = "-p no:warnings"
 
 [tool.ruff]
 line-length = 88
-exclude = ["alembic/"]
+target-version = "py311"
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = []
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
 
 [tool.taskipy.tasks]
 api = "uvicorn src.app:app --reload"
