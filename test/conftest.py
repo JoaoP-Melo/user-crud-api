@@ -45,9 +45,9 @@ def client_override(session):
 @pytest.fixture
 def add_user_database(session):
     new_user = Users(
-        username="TEST",
+        username="GhostUser",
         age= 0,
-        email= "TEST@example.com"
+        email= "ghost_user@example.com"
     )
 
     session.add(new_user)

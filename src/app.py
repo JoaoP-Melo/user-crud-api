@@ -103,3 +103,23 @@ def search_user(id: int, session: Session = Depends(get_db)):
             )
     
     return existing_user
+
+
+@app.delete("/delete/{id}", status_code=HTTPStatus.OK, response_model=PublicUser)
+def delete_user(id: int, session: Session = Depends(get_db)):
+    existing_user = session.scalar(
+        select(Users).where(
+           (Users.id == id)
+        )
+    )
+
+    if existing_user is None:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="ID not found",
+            )
+    
+    session.delete(existing_user)
+    session.commit()
+
+    return existing_user

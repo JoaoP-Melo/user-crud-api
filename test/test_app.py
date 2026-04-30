@@ -53,14 +53,29 @@ def test_update_users(client_override, add_user_database, session):
     
 
 def test_search_users(client_override, add_user_database, session):
-    response = client_override.get(
-        "/search/1"
-    )
-
     existing_user = session.scalar(
         select(Users).where(
            (Users.id == 1)
         )
+    )
+
+    response = client_override.get(
+       f"/search/{existing_user.id}"
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json()["id"] == existing_user.id
+
+
+def test_delete_user(client_override, add_user_database, session):
+    existing_user = session.scalar(
+        select(Users).where(
+           (Users.id == 1)
+        )
+    )
+
+    response = client_override.delete(
+        f"/delete/{existing_user.id}"
     )
 
     assert response.status_code == HTTPStatus.OK
