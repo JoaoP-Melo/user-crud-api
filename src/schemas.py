@@ -9,7 +9,12 @@ class PrivateUser(BaseModel):
     username: str
     age: int
     email: EmailStr
+    password: str
 
 
-class PublicUser(PrivateUser):
+class PublicUser(BaseModel):
     id: int
+    username: str
+    age: int
+    email: EmailStr
+

@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from fastapi.testclient import TestClient
 from sqlalchemy import select, func
-from models import Users
+from models import User
 from database import get_db
 from app import app
 
@@ -16,7 +16,7 @@ def test_read_root_sucess():
 
 def test_create_user_success(client_override, session):
     response = client_override.post(
-        "/create/", json={"username": "test", "age": 15, "email": "test@example.com"}
+        "/create/", json={"username": "test", "age": 15, "email": "test@example.com", "password": "testtest"}
     )
 
     assert response.status_code == HTTPStatus.CREATED
@@ -25,10 +25,11 @@ def test_create_user_success(client_override, session):
         "username": "test",
         "age": 15,
         "email": "test@example.com",
+        "password": "testtest"
     }
 
-    query = select(Users).where(
-        Users.email == "test@example.com", Users.username == "test"
+    query = select(User).where(
+        User.email == "test@example.com", User.username == "test"
     )
 
     new_user = session.execute(query).scalars().first()
@@ -59,8 +60,8 @@ def test_read_users(session=get_db):
 
 def test_update_users(client_override, add_user_database, session):
     existing_user = session.scalar(
-        select(Users).where(
-           (Users.id == 1)
+        select(User).where(
+           (User.id == 1)
         )
     )
 
@@ -73,8 +74,8 @@ def test_update_users(client_override, add_user_database, session):
 
 def test_update_users_id_error(client_override, add_user_database, session):
     existing_user = session.scalar(
-        select(Users).where(
-           (Users.id == 1)
+        select(User).where(
+           (User.id == 1)
         )
     )
 
@@ -87,8 +88,8 @@ def test_update_users_id_error(client_override, add_user_database, session):
 
 def test_update_users_email_error(client_override, add_user_database, session):
     existing_user = session.scalar(
-        select(Users).where(
-           (Users.id == 1)
+        select(User).where(
+           (User.id == 1)
         )
     )
 
@@ -101,8 +102,8 @@ def test_update_users_email_error(client_override, add_user_database, session):
 
 def test_update_users_name_error(client_override, add_user_database, session):
     existing_user = session.scalar(
-        select(Users).where(
-           (Users.id == 1)
+        select(User).where(
+           (User.id == 1)
         )
     )
 
@@ -115,8 +116,8 @@ def test_update_users_name_error(client_override, add_user_database, session):
 
 def test_search_users_success(client_override, add_user_database, session):
     existing_user = session.scalar(
-        select(Users).where(
-           (Users.id == 1)
+        select(User).where(
+           (User.id == 1)
         )
     )
 
@@ -138,8 +139,8 @@ def test_search_users_id_error(client_override, add_user_database, session):
 
 def test_delete_user_success(client_override, add_user_database, session):
     existing_user = session.scalar(
-        select(Users).where(
-           (Users.id == 1)
+        select(User).where(
+           (User.id == 1)
         )
     )
 

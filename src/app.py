@@ -4,8 +4,9 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from schemas import Message, PublicUser, PrivateUser
-from models import Users
+from models import User
 from database import get_db
+from security import get_password_hash
 
 app = FastAPI()
 
@@ -19,8 +20,8 @@ def read_root():
 def create_user(user: PrivateUser, session: Session = Depends(get_db)):
 
     existing_user = session.scalar(
-        select(Users).where(
-            (Users.username == user.username) | (Users.email == user.email)
+        select(User).where(
+            (User.username == user.username) | (User.email == user.email)
         )
     )
 
@@ -36,26 +37,32 @@ def create_user(user: PrivateUser, session: Session = Depends(get_db)):
                 detail="Email already exists",
             )
 
-    new_user = Users(username=user.username, age=user.age, email=user.email)
+    hashed_password = get_password_hash(user.password)
+    new_user = User(username=user.username, age=user.age, email=user.email, password=hashed_password)
 
     session.add(new_user)
     session.commit()
     session.refresh(new_user)
 
-    return new_user
+    return {
+        "id": new_user.id,
+        "username": new_user.username,
+        "age": new_user.age,
+        "email": new_user.email,
+    }
 
 
 @app.get("/read/", status_code=HTTPStatus.OK)
 def read_users(session: Session = Depends(get_db)):
-    users = session.scalars(select(Users)).all()
+    users = session.scalars(select(User)).all()
     return users
 
 
 @app.put("/update/{id}", status_code=HTTPStatus.OK)
 def update_users(id: int, user: PrivateUser, session: Session = Depends(get_db)):
     existing_user = session.scalar(
-        select(Users).where(
-           (Users.id == id)
+        select(User).where(
+           (User.id == id)
         )
     )
 
@@ -91,8 +98,8 @@ def update_users(id: int, user: PrivateUser, session: Session = Depends(get_db))
 @app.get("/search/{id}", status_code=HTTPStatus.OK, response_model=PublicUser)
 def search_user(id: int, session: Session = Depends(get_db)):
     existing_user = session.scalar(
-        select(Users).where(
-           (Users.id == id)
+        select(User).where(
+           (User.id == id)
         )
     )
 
@@ -108,8 +115,8 @@ def search_user(id: int, session: Session = Depends(get_db)):
 @app.delete("/delete/{id}", status_code=HTTPStatus.OK, response_model=PublicUser)
 def delete_user(id: int, session: Session = Depends(get_db)):
     existing_user = session.scalar(
-        select(Users).where(
-           (Users.id == id)
+        select(User).where(
+           (User.id == id)
         )
     )
 

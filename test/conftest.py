@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from sqlalchemy.pool import StaticPool
-from models import Base, Users
+from models import Base, User
 from app import app
 from database import get_db
 from schemas import PrivateUser
@@ -44,10 +44,11 @@ def client_override(session):
 
 @pytest.fixture
 def add_user_database(session):
-    new_user = Users(
+    new_user = User(
         username="GhostUser",
         age= 0,
-        email= "ghost_user@example.com"
+        email= "ghost_user@example.com",
+        password= "testtest"
     )
 
     session.add(new_user)

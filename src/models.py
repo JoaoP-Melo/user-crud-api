@@ -5,11 +5,11 @@ from sqlalchemy.orm import declarative_base
 Base = declarative_base()
 
 
-class Users(Base):
-    __tablename__ = "users"
+class User(Base):
+    __tablename__ = "user"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     username: Mapped[str] = mapped_column(String, nullable=False)
     age: Mapped[int] = mapped_column(Integer)
-    email: Mapped[str] = mapped_column(String, nullable=False)
+    email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
