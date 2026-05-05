@@ -12,3 +12,4 @@ class Users(Base):
     username: Mapped[str] = mapped_column(String, nullable=False)
     age: Mapped[int] = mapped_column(Integer)
     email: Mapped[str] = mapped_column(String, nullable=False)
+    password: Mapped[str] = mapped_column(String, nullable=False)
