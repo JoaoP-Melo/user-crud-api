@@ -7,7 +7,7 @@ from pydantic import EmailStr
 from schemas import Message, PublicUser, PrivateUser
 from models import User
 from database import get_db
-from security import get_password_hash, create_token, verify_password
+from security import get_password_hash, create_token, verify_password, validaty_token
 
 app = FastAPI()
 
@@ -59,11 +59,11 @@ def read_users(session: Session = Depends(get_db)):
     return users
 
 
-@app.put("/update/{id}", status_code=HTTPStatus.OK)
-def update_users(id: int, user: PrivateUser, session: Session = Depends(get_db)):
+@app.put("/update/{user_id}", status_code=HTTPStatus.OK)
+def update_users(user: PrivateUser, session: Session = Depends(get_db), user_id: int = Depends(validaty_token)):
     existing_user = session.scalar(
         select(User).where(
-           (User.id == id)
+           (User.id == user_id)
         )
     )
 
@@ -96,11 +96,11 @@ def update_users(id: int, user: PrivateUser, session: Session = Depends(get_db))
     return user
 
 
-@app.get("/search/{id}", status_code=HTTPStatus.OK, response_model=PublicUser)
-def search_user(id: int, session: Session = Depends(get_db)):
+@app.get("/search/{user_id}", status_code=HTTPStatus.OK, response_model=PublicUser)
+def search_user(session: Session = Depends(get_db), user_id: int = Depends(validaty_token)):
     existing_user = session.scalar(
         select(User).where(
-           (User.id == id)
+           (User.id == user_id)
         )
     )
 
@@ -113,11 +113,11 @@ def search_user(id: int, session: Session = Depends(get_db)):
     return existing_user
 
 
-@app.delete("/delete/{id}", status_code=HTTPStatus.OK, response_model=PublicUser)
-def delete_user(id: int, session: Session = Depends(get_db)):
+@app.delete("/delete/{user_id}", status_code=HTTPStatus.OK, response_model=PublicUser)
+def delete_user(session: Session = Depends(get_db), user_id: int = Depends(validaty_token)):
     existing_user = session.scalar(
         select(User).where(
-           (User.id == id)
+           (User.id == user_id)
         )
     )
 
