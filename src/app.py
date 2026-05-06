@@ -2,11 +2,12 @@ from fastapi import FastAPI, Depends, HTTPException
 from http import HTTPStatus
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
+from pydantic import EmailStr
 
 from schemas import Message, PublicUser, PrivateUser
 from models import User
 from database import get_db
-from security import get_password_hash
+from security import get_password_hash, create_token, verify_password
 
 app = FastAPI()
 
@@ -130,3 +131,27 @@ def delete_user(id: int, session: Session = Depends(get_db)):
     session.commit()
 
     return existing_user
+
+@app.post("/access/", status_code=HTTPStatus.CREATED)
+def create_user_access(email: EmailStr, password: str, session: Session=Depends(get_db)):
+    existing_user = session.scalar(
+        select(User).where(
+           (User.email == email)
+        )
+    )
+
+    if existing_user is None:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Email not found",
+            )
+    
+    if verify_password(password, existing_user.password) is False:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Icorrect Password",
+            )
+    
+    token = create_token(existing_user.id)
+
+    return token
