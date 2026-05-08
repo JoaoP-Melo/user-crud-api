@@ -11,7 +11,7 @@ from security import get_password_hash, create_token, verify_password, validaty_
 
 app = FastAPI()
 
-
+ 
 @app.get("/", status_code=HTTPStatus.OK, response_model=Message)
 def read_root():
     return {"message": "Hello Word"}
@@ -67,7 +67,6 @@ def update_users(user: PrivateUser, session: Session = Depends(get_db), user_id:
         )
     )
 
-
     if existing_user is None:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -90,6 +89,7 @@ def update_users(user: PrivateUser, session: Session = Depends(get_db), user_id:
     existing_user.username = user.username
     existing_user.age = user.age
     existing_user.email = user.email
+    existing_user.password = get_password_hash(user.password)
 
     session.commit()
     

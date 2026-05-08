@@ -20,34 +20,32 @@ def test_create_user_success(client_override, session):
     )
 
     assert response.status_code == HTTPStatus.CREATED
+
+    new_user = session.scalar(select(User).where(
+        User.email == "test@example.com", User.username == "test"
+        )
+    )
+
     assert response.json() == {
-        "id": 1,
+        "id": new_user.id,
         "username": "test",
         "age": 15,
         "email": "test@example.com",
-        "password": "testtest"
     }
-
-    query = select(User).where(
-        User.email == "test@example.com", User.username == "test"
-    )
-
-    new_user = session.execute(query).scalars().first()
-
     assert new_user.username == "test"
     assert new_user.email == "test@example.com"
 
 
 def test_create_user_name_error(client_override, add_user_database, session):
     response = client_override.post(
-        "/create/", json={"username": "GhostUser", "age": 15, "email": "test@example.com"}
+        "/create/", json={"username": "test", "age": 15, "email": "test@example.com", "password": "testtest"}
     )
 
     assert response.status_code == HTTPStatus.CONFLICT
 
 def test_create_user_email_error(client_override, add_user_database, session):
     response = client_override.post(
-        "/create/", json={"username": "teste", "age": 15, "email": "ghost_user@example.com"}
+        "/create/", json={"username": "test", "age": 15, "email": "test@example.com", "password": "testtest"}
     )
 
     assert response.status_code == HTTPStatus.CONFLICT
@@ -58,103 +56,65 @@ def test_read_users(session=get_db):
     assert response.status_code == HTTPStatus.OK
 
 
-def test_update_users(client_override, add_user_database, session):
-    existing_user = session.scalar(
-        select(User).where(
-           (User.id == 1)
-        )
-    )
-
+def test_update_users_sucess(client_override, add_user_database, session):
     response = client_override.put(
-        "/update/1", json={"username": "teste", "age": 0, "email": "teste@example.com"}
+        "/update/{add_user_database.id}", json={"username": "teste", "age": 15, "email": "teste@example.com", "password": "testeteste"}
     )
-
+ 
     assert response.status_code == HTTPStatus.OK
 
 
-def test_update_users_id_error(client_override, add_user_database, session):
-    existing_user = session.scalar(
-        select(User).where(
-           (User.id == 1)
-        )
-    )
-
+def test_update_users_id_error(client_override, session):
     response = client_override.put(
-        "/update/0", json={"username": "teste", "age": 0, "email": "teste@example.com"}
+        "/update/", json={"username": "teste", "age": 15, "email": "teste@example.com", "password": "testeteste"}
     )
 
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
 def test_update_users_email_error(client_override, add_user_database, session):
-    existing_user = session.scalar(
-        select(User).where(
-           (User.id == 1)
-        )
-    )
-
     response = client_override.put(
-        "/update/1", json={"username": "teste", "age": 0, "email": "ghost_user@example.com"}
+        "/update/{add_user_database.id}", json={"username": "teste", "age": 0, "email": "test@example.com", "password": "testeteste"}
     )
 
     assert response.status_code == HTTPStatus.CONFLICT
 
 
 def test_update_users_name_error(client_override, add_user_database, session):
-    existing_user = session.scalar(
-        select(User).where(
-           (User.id == 1)
-        )
-    )
-
     response = client_override.put(
-        "/update/1", json={"username": "GhostUser", "age": 0, "email": "teste@example.com"}
+        "/update/{add_user_database.id}", json={"username": "test", "age": 0, "email": "teste@example.com", "password": "testeteste"}
     )
 
     assert response.status_code == HTTPStatus.CONFLICT
 
 
 def test_search_users_success(client_override, add_user_database, session):
-    existing_user = session.scalar(
-        select(User).where(
-           (User.id == 1)
-        )
-    )
-
     response = client_override.get(
-       f"/search/{existing_user.id}"
+       "/search/{add_user_database.id}"
     )
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json()["username"] == existing_user.username
+    assert response.json()["username"] == add_user_database.username
 
 
 def test_search_users_id_error(client_override, add_user_database, session):
     response = client_override.get(
-       "/search/0"
+       "/search/"
     )
-
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
 def test_delete_user_success(client_override, add_user_database, session):
-    existing_user = session.scalar(
-        select(User).where(
-           (User.id == 1)
-        )
-    )
-
     response = client_override.delete(
-        f"/delete/{existing_user.id}"
+        "/delete/{add_user_database.id}"
     )
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json()["username"] == existing_user.username
+    assert response.json()["username"] == add_user_database.username
 
 
 def test_delete_user_id_error(client_override, add_user_database, session):
     response = client_override.delete(
-        "/delete/0"
+        "/delete/"
     )
-
     assert response.status_code == HTTPStatus.NOT_FOUND
