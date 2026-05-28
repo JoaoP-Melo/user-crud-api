@@ -9,11 +9,14 @@ from models import User
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from http import HTTPStatus
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
-SECRET_KEY = 'your-secret-key'
-ALGORITHM = 'HS256'
-TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
+TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 oauth2_scheme = HTTPBearer()
 pwd_context = PasswordHash.recommended()
 

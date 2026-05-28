@@ -9,10 +9,13 @@ from app import app
 from database import get_db
 from schemas import PrivateUser
 from security import get_password_hash, create_token, validaty_token
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
 engine = create_engine(
-    "postgresql+psycopg://postgres:12345678@localhost:5432/fastapi_test_db"
+    os.getenv("DATABASE_URL")
     )
 SessionTest = sessionmaker(bind=engine)
 
